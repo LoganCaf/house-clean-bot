@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg style="background-color: #000;" version="1.1" viewBox="0 0 100.0 100.0" xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+ <g id="layer0-石材边线" inkscape:groupmode="layer" inkscape:label="0-石材边线">
+  <path d="M 100.0,49.66969361541953 L 66.55980286903821,0.0" fill="none" stroke="rgb(255,73,12)" stroke-width="0.1"/>
+ </g>
+ <g id="layer0-结构边线" inkscape:groupmode="layer" inkscape:label="0-结构边线">
+  <path d="M 76.20443224128871,0.0 L 100.0,35.34421690985107" fill="none" stroke="rgb(178,0,178)" stroke-width="0.1"/>
+ </g>
+ <g id="layer0-金属格栅" inkscape:groupmode="layer" inkscape:label="0-金属格栅">
+  <path d="M 80.35936399999997,6.170914499999981 L 77.870364,7.845914500000049" fill="none" stroke="rgb(73,73,73)" stroke-width="0.1"/>
+  <path d="M 77.870364,7.845914500000049 L 77.591364,7.430914499999972" fill="none" stroke="rgb(73,73,73)" stroke-width="0.1"/>
+  <path d="M 77.591364,7.430914499999972 L 80.08036399999997,5.755914500000017" fill="none" stroke="rgb(73,73,73)" stroke-width="0.1"/>
+  <path d="M 80.08036399999997,5.755914500000017 L 80.35936399999997,6.170914499999981" fill="none" stroke="rgb(73,73,73)" stroke-width="0.1"/>
+  <path d="M 88.17736400000001,17.783914500000037 L 85.68936400000001,19.45891449999999" fill="none" stroke="rgb(73,73,73)" stroke-width="0.1"/>
+  <path d="M 85.68936400000001,19.45891449999999 L 85.41036400000002,19.044914500000004" fill="none" stroke="rgb(73,73,73)" stroke-width="0.1"/>
+  <path d="M 85.41036400000002,19.044914500000004 L 87.89836400000002,17.36891449999996" fill="none" stroke="rgb(73,73,73)" stroke-width="0.1"/>
+  <path d="M 87.89836400000002,17.36891449999996 L 88.17736400000001,17.783914500000037" fill="none" stroke="rgb(73,73,73)" stroke-width="0.1"/>
+  <path d="M 95.99636399999997,29.39691449999998 L 93.50836399999997,31.072914500000024" fill="none" stroke="rgb(73,73,73)" stroke-width="0.1"/>
+  <path d="M 93.50836399999997,31.072914500000024 L 93.228364,30.65791450000006" fill="none" stroke="rgb(73,73,73)" stroke-width="0.1"/>
+  <path d="M 93.228364,30.65791450000006 L 95.71736399999998,28.982914499999993" fill="none" stroke="rgb(73,73,73)" stroke-width="0.1"/>
+  <path d="M 95.71736399999998,28.982914499999993 L 95.99636399999997,29.39691449999998" fill="none" stroke="rgb(73,73,73)" stroke-width="0.1"/>
+ </g>
+ <g id="layerAXIS" inkscape:groupmode="layer" inkscape:label="AXIS">
+  <path d="M 94.90336400000001,63.58591450000006 L 40.81753407628855,100.0" fill="none" stroke="rgb(0,178,0)" stroke-width="0.1"/>
+  <path d="M 38.939677768478305,0.0 L 0.0,26.216300432197272" fill="none" stroke="rgb(0,178,0)" stroke-width="0.1"/>
+ </g>
+ <g id="layerCURTWALL" inkscape:groupmode="layer" inkscape:label="CURTWALL">
+  <path d="M 72.58778239485576,0.0 L 100.0,40.71594056161996" fill="none" stroke="rgb(0,178,178)" stroke-width="0.1"/>
+  <path d="M 73.79449263806742,0.0 L 100.0,38.9234994872437" fill="none" stroke="rgb(0,178,178)" stroke-width="0.1"/>
+  <path d="M 93.92236400000002,30.79291450000005 L 100.0,39.81989667029177" fill="none" stroke="rgb(0,178,178)" stroke-width="0.1"/>
+ </g>
+ <g id="layerDIM_LEAD" inkscape:groupmode="layer" inkscape:label="DIM_LEAD">
+  <path d="M 98.283364,37.08791450000001 L 77.19136400000002,59.197914500000024" fill="none" stroke="rgb(0,178,0)" stroke-width="0.1"/>
+  <path d="M 98.283364,37.08791450000001 L 77.19136400000002,59.197914500000024" fill="none" stroke="rgb(0,178,0)" stroke-width="0.1"/>
+  <path d="M 77.19136400000002,59.197914500000024 L 58.50636400000002,71.77691449999998" fill="none" stroke="rgb(0,178,0)" stroke-width="0.1"/>
+ </g>
+ <g id="layerPUB_TEXT" inkscape:groupmode="layer" inkscape:label="PUB_TEXT">
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK SC" font-size="2" transform="rotate(-33.95,58.93336399999998,69.59091450000005)" x="58.93336399999998" y="69.59091450000005">
+   消防救援窗
+  </text>
+ </g>
+ <g id="layerWALL" inkscape:groupmode="layer" inkscape:label="WALL">
+  <path d="M 100.0,10.724810222475298 L 88.59436399999998,18.402914500000065" fill="none" instance-id="-1" semantic-id="1" stroke="rgb(178,178,0)" stroke-width="0.1"/>
+  <path d="M 100.0,8.314213050478429 L 87.478364,16.74391449999996" fill="none" instance-id="-1" semantic-id="1" stroke="rgb(178,178,0)" stroke-width="0.1"/>
+  <path d="M 88.59436399999998,18.402914500000065 L 87.478364,16.74391449999996" fill="none" instance-id="-1" semantic-id="1" stroke="rgb(178,178,0)" stroke-width="0.1"/>
+ </g>
+</svg>

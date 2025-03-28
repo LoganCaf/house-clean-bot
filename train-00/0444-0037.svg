@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg style="background-color: #000;" version="1.1" viewBox="0 0 100.0 100.0" xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+ <g id="layerAXIS" inkscape:groupmode="layer" inkscape:label="AXIS">
+  <path d="M 80.82749999999999,62.75 L 100.0,62.75" fill="none" stroke="rgb(0,178,0)" stroke-width="0.1"/>
+  <path d="M 73.82749999999999,62.75 L 98.32749999999999,62.75" fill="none" stroke="rgb(0,178,0)" stroke-width="0.1"/>
+  <path d="M 95.82749999999999,100.0 L 95.82749999999999,62.75" fill="none" stroke="rgb(0,178,0)" stroke-width="0.1"/>
+  <path d="M 73.82749999999999,62.75 L 98.32749999999999,62.75" fill="none" stroke="rgb(0,178,0)" stroke-width="0.1"/>
+  <path d="M 95.82749999999999,62.75 L 95.82749999999999,0.0" fill="none" stroke="rgb(0,178,0)" stroke-width="0.1"/>
+  <path d="M 83.82749999999999,62.75 L 100.0,62.75" fill="none" stroke="rgb(0,178,0)" stroke-width="0.1"/>
+  <path d="M 83.82749999999999,62.75 L 100.0,62.75" fill="none" stroke="rgb(0,178,0)" stroke-width="0.1"/>
+  <text fill="rgb(0,178,0)" font-family="Noto Sans CJK SC" font-size="2" transform="rotate(-90.0,94.56450000000007,26.25)" x="94.56450000000007" y="26.25">
+   8100
+  </text>
+ </g>
+ <g id="layerDIM_ELEV" inkscape:groupmode="layer" inkscape:label="DIM_ELEV">
+  <path d="M 7.517500000000041,23.854000000000013 L 4.517500000000041,20.854000000000013" fill="none" stroke="rgb(0,178,0)" stroke-width="0.1"/>
+  <path d="M 7.517500000000041,23.854000000000013 L 10.517500000000041,20.854000000000013" fill="none" stroke="rgb(0,178,0)" stroke-width="0.1"/>
+  <path d="M 4.517500000000041,20.854000000000013 L 17.448499999999967,20.854000000000013" fill="none" stroke="rgb(0,178,0)" stroke-width="0.1"/>
+  <path d="M 10.667500000000018,32.974999999999994 L 7.667500000000018,29.974999999999994" fill="none" stroke="rgb(0,178,0)" stroke-width="0.1"/>
+  <path d="M 10.667500000000018,32.974999999999994 L 13.667500000000018,29.974999999999994" fill="none" stroke="rgb(0,178,0)" stroke-width="0.1"/>
+  <path d="M 7.667500000000018,29.974999999999994 L 20.598500000000058,29.974999999999994" fill="none" stroke="rgb(0,178,0)" stroke-width="0.1"/>
+ </g>
+ <g id="layerDIM_LEAD" inkscape:groupmode="layer" inkscape:label="DIM_LEAD">
+  <path d="M 11.172500000000014,50.429 L 14.59050000000002,42.19200000000001" fill="none" stroke="rgb(0,178,0)" stroke-width="0.1"/>
+  <path d="M 14.59050000000002,42.19200000000001 L 28.912500000000023,42.19200000000001" fill="none" stroke="rgb(0,178,0)" stroke-width="0.1"/>
+  <path d="M 0.0,7.050000000000011 L 5.5405000000000655,7.050000000000011" fill="none" stroke="rgb(0,178,0)" stroke-width="0.1"/>
+  <path d="M 0.0,73.80000000000001 L 5.185500000000047,73.80000000000001" fill="none" stroke="rgb(0,178,0)" stroke-width="0.1"/>
+ </g>
+ <g id="layerDOTE" inkscape:groupmode="layer" inkscape:label="DOTE">
+  <path d="M 3.1725000000000136,100.0 L 3.1725000000000136,0.0" fill="none" stroke="rgb(178,0,0)" stroke-width="0.1"/>
+  <path d="M 0.0,62.75 L 80.82749999999999,62.75" fill="none" stroke="rgb(178,0,0)" stroke-width="0.1"/>
+ </g>
+ <g id="layerGROUND" inkscape:groupmode="layer" inkscape:label="GROUND">
+  <path d="M 6.172500000000014,0.0 L 6.172500000000014,100.0" fill="none" stroke="rgb(178,178,0)" stroke-width="0.1"/>
+  <path d="M 9.172500000000014,0.0 L 9.172500000000014,100.0" fill="none" stroke="rgb(178,178,0)" stroke-width="0.1"/>
+  <path d="M 12.172500000000014,0.0 L 12.172500000000014,100.0" fill="none" stroke="rgb(178,178,0)" stroke-width="0.1"/>
+ </g>
+ <g id="layerPUB_DIM" inkscape:groupmode="layer" inkscape:label="PUB_DIM">
+  <path d="M 3.1725000000000136,25.760999999999996 L 3.1725000000000136,19.337999999999994" fill="none" stroke="rgb(79,160,53)" stroke-width="0.1"/>
+  <path d="M 0.0,21.837999999999994 L 3.1725000000000136,21.837999999999994" fill="none" stroke="rgb(79,160,53)" stroke-width="0.1"/>
+ </g>
+ <g id="layerPUB_TEXT" inkscape:groupmode="layer" inkscape:label="PUB_TEXT">
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK SC" font-size="2" transform="rotate(-0.0,6.54849999999999,19.804000000000002)" x="6.54849999999999" y="19.804000000000002">
+   -0.150
+  </text>
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK SC" font-size="2" transform="rotate(-0.0,9.29849999999999,28.92500000000001)" x="9.29849999999999" y="28.92500000000001">
+   -0.300
+  </text>
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK SC" font-size="2" transform="rotate(-0.0,18.703499999999963,41.141999999999996)" x="18.703499999999963" y="41.141999999999996">
+   室外台阶
+  </text>
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK SC" font-size="2" transform="rotate(-0.0,16.245499999999993,46.74199999999999)" x="16.245499999999993" y="46.74199999999999">
+   详工程做法
+  </text>
+ </g>
+</svg>
