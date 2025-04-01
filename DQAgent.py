@@ -11,13 +11,13 @@ class DQAgent:
         self.inputShape = inputShape
         self.outputShape = outputShape
         self.epsilon = 1
-        self.epsilonDecay = .99
-        self.learningRate = 0.00025
+        self.epsilonDecay = .9999
+        self.learningRate = 0.0025
         self.epsilonMin = 0.1
         self.gamma = 0.95
         self.memory = deque(maxlen=10240)
-        self.minMemorySize = 256
-        self.sampleSize = 64
+        self.minMemorySize = 1024
+        self.sampleSize = 256
         self.actionModel = self.buildModel()
         self.targetModel = self.buildModel()
         self.updateTime = 0
@@ -28,7 +28,7 @@ class DQAgent:
         if self.updateTime > 0:
             return
         self.targetModel.set_weights(self.actionModel.get_weights())
-        self.updateTime = 10000
+        self.updateTime = 1000
 
     def reset(self):
         pass
@@ -65,18 +65,18 @@ class DQAgent:
         self.train()
     
     def train(self):
-        if len(self.memory) < 64: #self.minMemorySize:
+        if len(self.memory) < self.minMemorySize:
             return
         batch = random.sample(self.memory, self.sampleSize)
         states = np.array([b[0] for b in batch]).reshape((self.sampleSize, *self.inputShape))
-        currTargets = self.targetModel.predict(states, verbose=0)
-        nextTargets = self.targetModel.predict(np.array([b[3] for b in batch]).reshape((self.sampleSize, *self.inputShape)), verbose=0)
+        currTargets = self.targetModel.predict(states, verbose=0, batch_size=self.sampleSize)
+        nextTargets = self.targetModel.predict(np.array([b[3] for b in batch]).reshape((self.sampleSize, *self.inputShape)), verbose=0, batch_size=self.sampleSize)
 
         for i, (state, action, reward, nextState, done) in enumerate(batch):
             if done:
                 currTargets[i][action] = reward
             else:
                 currTargets[i][action] = reward + self.gamma * np.argmax(nextTargets[i])
-        self.actionModel.fit(states, currTargets, epochs=1, verbose=0)
+        self.actionModel.fit(states, currTargets, epochs=1, verbose=0, batch_size=self.sampleSize)
         self.updateTargetModel()
 
