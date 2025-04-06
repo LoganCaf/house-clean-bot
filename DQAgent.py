@@ -12,7 +12,7 @@ class DQAgent:
         self.inputShape = inputShape
         self.outputShape = outputShape
         self.epsilon = 1
-        self.epsilonDecay = .9999
+        self.epsilonDecay = .99995
         self.learningRate = 0.025
         self.epsilonMin = 0.1
         self.gamma = 0.95
@@ -25,13 +25,18 @@ class DQAgent:
         self.trainTime = 0
         self.updateTargetModel()
     
+    def loadModel(self,modelPath):
+        self.actionModel.load_weights(modelPath)
+        self.targetModel.load_weights(modelPath)
+        self.updateTargetModel()
+    
     def updateTargetModel(self):
         self.updateTime -=1
         if self.updateTime > 0:
             return
         self.targetModel.set_weights(self.actionModel.get_weights())
         self.updateTime = 1000
-        self.targetModel.save_weights(f"Model-{datetime.now()}.h5")
+        self.targetModel.save_weights(f"Model-{datetime.now()}.weights.h5")
 
     def reset(self):
         pass
