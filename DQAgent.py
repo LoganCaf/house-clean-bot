@@ -36,7 +36,7 @@ class DQAgent:
             return
         self.targetModel.set_weights(self.actionModel.get_weights())
         self.updateTime = 1000
-        self.targetModel.save_weights(f"models/Model-{datetime.now()}.weights.h5")
+        self.targetModel.save_weights(f"models/Model-{datetime.now().strftime("%d-%m-%Y-%H-%M")}.weights.h5")
         self.actionModel.save_weights(f"models/Model-latest.weights.h5")
 
     def reset(self):
