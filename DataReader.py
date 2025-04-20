@@ -42,11 +42,11 @@ import xml.etree.ElementTree as ET
 import numpy as np
 from scipy.ndimage import binary_dilation
 from math import cos, sin, radians, pi
+import re
 
 
 color_grid = None
 
-import re
 
 def parse_color(col):
     if not col or col.lower() == 'none':
@@ -78,7 +78,7 @@ def parse_color(col):
       'white': (1,1,1),
       'red':   (1,0,0),
       'blue':  (0,0,1),
-    }
+    }   # can probably add more
     return named.get(col.lower(), (0,0,0))
 
 
@@ -129,6 +129,7 @@ def parse_path(d_str, toGrid, num_samples=20):
     def parse_point(index):
         return float(tokens[index]), float(tokens[index + 1])
 
+    # This loop goes through the tokens in the SVG which is start/end point, move, arc, etc. Each letter represents a token
     while i < len(tokens):
         token = tokens[i]
 
@@ -137,7 +138,7 @@ def parse_path(d_str, toGrid, num_samples=20):
             i += 1
             continue
 
-        # Skip unsupported commands
+        # Skip unsupported commands/tokens
         if current_cmd in {'a', 'H', 'h', 'V', 'v', 'S', 's', 'T', 't'}:
             i += 1
             continue
@@ -218,7 +219,7 @@ def parse_path(d_str, toGrid, num_samples=20):
 def parseSVG(svg_path, grid_size=(300, 300), canvas_size=(500, 500)):
     tree = ET.parse(svg_path)
     root = tree.getroot()
-    ns = {'svg':'http://www.w3.org/2000/svg'}     # Supposedly this is necessary 
+    ns = {'svg':'http://www.w3.org/2000/svg'}     # might not be necessary any more but keeping for now
 
     grid = np.zeros(grid_size, dtype=np.uint8)
     rows, cols = grid_size
@@ -236,6 +237,7 @@ def parseSVG(svg_path, grid_size=(300, 300), canvas_size=(500, 500)):
         return gy, gx
     
 
+    # print tags
     print("SVG width/height:", root.attrib.get('width'), root.attrib.get('height'))
     for elem in root.iter():
         tag = elem.tag.split('}')[-1]
@@ -248,6 +250,7 @@ def parseSVG(svg_path, grid_size=(300, 300), canvas_size=(500, 500)):
 
 
     for elem in root.iter():
+        # Going through all the possible shapes here, basically a bunch of mostly identical if statements, couple tweaks throughout
         tag = elem.tag.split('}')[-1]
         if tag == 'rect':
             x = float(elem.attrib.get('x', 0))
@@ -385,6 +388,10 @@ def parseSVG(svg_path, grid_size=(300, 300), canvas_size=(500, 500)):
 
 
     return grid, color_grid
+
+
+
+# Visualize the data
 
 import matplotlib.pyplot as plt
 
