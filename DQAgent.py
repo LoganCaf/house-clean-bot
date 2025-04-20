@@ -83,15 +83,26 @@ class DQAgent:
             return
         self.trainTime = 10
         batch = random.sample(self.memory, self.sampleSize)
-        states = np.array([b[0] for b in batch]).reshape((self.sampleSize, *self.inputShape))
-        currTargets = self.actionModel.predict(states, verbose=0, batch_size=self.sampleSize)
-        nextTargets = self.targetModel.predict(np.array([b[3] for b in batch]).reshape((self.sampleSize, *self.inputShape)), verbose=0, batch_size=self.sampleSize)
 
-        for i, (state, action, reward, nextState, done) in enumerate(batch):
-            if done:
-                currTargets[i][action] = reward
+        states      = np.vstack([exp[0] for exp in batch])           # shape: (batch, H, W, C)
+        actions     = np.array([exp[1] for exp in batch])            # shape: (batch,)
+        rewards     = np.array([exp[2] for exp in batch])            # shape: (batch,)
+        next_states = np.vstack([exp[3] for exp in batch])           # shape: (batch, H, W, C)
+        dones       = np.array([exp[4] for exp in batch])            # shape: (batch,)
+
+        q_next_online = self.actionModel.predict(next_states,  verbose=0)  # shape: (batch, n_actions)
+        q_next_target = self.targetModel.predict(next_states,  verbose=0)  # shape: (batch, n_actions)
+
+        q_current = self.actionModel.predict(states, verbose=0)
+
+        for i in range(self.sampleSize):
+            if dones[i]:
+                q_current[i, actions[i]] = rewards[i]
             else:
-                currTargets[i][action] = reward + self.gamma * np.max(nextTargets[i])
-        self.actionModel.fit(states, currTargets, epochs=1, verbose=0, batch_size=self.sampleSize)
+                best_next_action = np.argmax(q_next_online[i])                 # select via online net
+                target_q_value   = q_next_target[i, best_next_action]          # evaluate via target net
+                q_current[i, actions[i]] = rewards[i] + self.gamma * target_q_value
+
+        self.actionModel.fit(states, q_current, epochs=1, batch_size=self.sampleSize, verbose=0)
         self.updateTargetModel()
 
