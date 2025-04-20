@@ -1,3 +1,6 @@
+## DQAgent.py
+# This file contains the DQAgent class, which implements a Deep Q-Learning agent using TensorFlow and Keras.
+
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
@@ -12,13 +15,13 @@ class DQAgent:
         self.inputShape = inputShape
         self.outputShape = outputShape
         self.epsilon = 1
-        self.epsilonDecay = .99999
-        self.learningRate = 0.000025
-        self.epsilonMin = 0.1
+        self.epsilonDecay = 0.99995
+        self.learningRate = 0.001
+        self.epsilonMin = 0.01
         self.gamma = 0.95
         self.memory = deque(maxlen=51200)
         self.minMemorySize = 5120
-        self.sampleSize = 512
+        self.sampleSize = 256
         self.actionModel = self.buildModel()
         self.targetModel = self.buildModel()
         self.updateTime = 0
@@ -43,16 +46,13 @@ class DQAgent:
         pass
 
     def buildModel(self):
-        model = Sequential()
-        model.add(Conv2D(128, (5, 5), activation='relu', input_shape=self.inputShape, padding='same'))
-        model.add(Conv2D(128, (3, 3), activation='relu', padding='same'))
-        model.add(Conv2D(128, (3, 3), activation='relu', padding='same'))
-        model.add(Flatten())
-        model.add(Dense(512, activation='relu'))
-        model.add(Dense(512, activation='relu'))
-        model.add(Dense(512, activation='relu'))
-        model.add(Dense(512, activation='relu'))
-        model.add(Dense(self.outputShape, activation='linear'))
+        model = Sequential([
+        Conv2D(64, (3,3), activation='relu', padding='same', input_shape=self.inputShape),
+        Conv2D(64, (3,3), activation='relu', padding='same'),
+        Flatten(),
+        Dense(256, activation='relu'),
+        Dense(self.outputShape, activation='linear')
+        ])
         model.compile(optimizer=Adam(learning_rate=self.learningRate), loss='mse')
         return model
 
@@ -82,10 +82,10 @@ class DQAgent:
             self.trainTime -= 1
             return
         self.trainTime = 10
-        batch = random.sample(self.memory, self.sampleSize*self.trainTime)
-        states = np.array([b[0] for b in batch]).reshape((self.sampleSize*self.trainTime, *self.inputShape))
+        batch = random.sample(self.memory, self.sampleSize)
+        states = np.array([b[0] for b in batch]).reshape((self.sampleSize, *self.inputShape))
         currTargets = self.actionModel.predict(states, verbose=0, batch_size=self.sampleSize)
-        nextTargets = self.targetModel.predict(np.array([b[3] for b in batch]).reshape((self.sampleSize*self.trainTime, *self.inputShape)), verbose=0, batch_size=self.sampleSize)
+        nextTargets = self.targetModel.predict(np.array([b[3] for b in batch]).reshape((self.sampleSize, *self.inputShape)), verbose=0, batch_size=self.sampleSize)
 
         for i, (state, action, reward, nextState, done) in enumerate(batch):
             if done:

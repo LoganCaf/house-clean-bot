@@ -1,3 +1,6 @@
+### File: map.py
+# This file contains the Map class, which represents a grid-based environment for an agent to navigate.
+
 import cv2 as cv
 import numpy as np
 from PIL import Image
@@ -82,6 +85,27 @@ class Map:
         out[out == 'c'] = 1
         out = out.astype(np.float16)
         return out
+
+    def getGrid3D(self):
+        arr = np.asarray(self.grid)              # convert first!
+        out = np.zeros((self.length, self.width, 4), dtype=np.float32)
+
+        out[:, :, 0] = (arr == 'w')              # wall channel
+        out[:, :, 1] = (arr == 'a')              # agent channel
+        out[:, :, 2] = (arr == 'e')              # empty channel
+        out[:, :, 3] = (arr == 'c')              # cleaned/visited channel
+        return out
+
+    def getMovableCount(self):
+        count = 0
+        for x in range(self.length):
+            for y in range(self.width):
+                if self.grid[x][y] != 'w':
+                    count += 1
+        return count
+
+
+        
 
 if __name__ == "__main__":
     m = Map(10, 10)
