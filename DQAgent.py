@@ -3,6 +3,11 @@
 
 import numpy as np
 import tensorflow as tf
+gpus = tf.config.list_physical_devices('GPU')
+for gpu in gpus:
+    tf.config.experimental.set_memory_growth(gpu, True)
+from tensorflow.keras import mixed_precision
+mixed_precision.set_global_policy('mixed_float16')
 from tensorflow.keras.models import Sequential, Model
 from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, Input, Lambda, add
 from tensorflow.keras.optimizers import Adam
@@ -10,8 +15,10 @@ from collections import deque
 import random
 from datetime import datetime
 
-from tensorflow.keras import mixed_precision
-mixed_precision.set_global_policy('mixed_float16')
+
+
+
+
 
 class DQAgent:
     def __init__(self,inputShape,outputShape):
@@ -24,7 +31,7 @@ class DQAgent:
         self.gamma = 0.95
         self.memory = deque(maxlen=51200)
         self.minMemorySize = 5120
-        self.sampleSize = 128
+        self.sampleSize = 64
         self.actionModel = self.buildModel()
         self.targetModel = self.buildModel()
         self.updateTime = 0
@@ -51,14 +58,16 @@ class DQAgent:
 
     def buildModel(self):
         inputs = Input(shape=self.inputShape)
-        x = Conv2D(64, (3,3), activation='relu', padding='same')(inputs)
-        x = Conv2D(64, (3,3), activation='relu', padding='same')(x)
+        x = Conv2D(128, (7,7), activation='relu')(inputs)
+        x = Conv2D(64, (3,3), activation='relu')(x)
         flat = Flatten()(x)
 
         v = Dense(128, activation='relu')(flat)
+        v = Dense(32, activation='relu')(v)
         v = Dense(1, activation='linear')(v)  # V(s)
 
         a = Dense(128, activation='relu')(flat)
+        a = Dense(32, activation='relu')(flat)
         a = Dense(self.outputShape, activation='linear')(a)  # A(s,a)
 
         mean_a = Lambda(lambda t: tf.reduce_mean(t, axis=1, keepdims=True))(a)

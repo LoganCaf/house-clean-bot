@@ -52,7 +52,7 @@ while roundNum < 10000:
             print("-------------------------------------Visited all cells")
             reward = GOAL_REWARD
         elif len(visited) > startLen:
-            reward = NEW_CELL_REWARD
+            reward = NEW_CELL_REWARD * (len(visited) - startLen)
         else:
             reward = STEP_PENALTY
         agent.remember(m.getGrid3D(), reward, reward == GOAL_REWARD)
