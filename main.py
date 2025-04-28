@@ -34,7 +34,8 @@ def reset():
 
 
 agent = DQAgent((MAXSIZE, MAXSIZE, MAXBANDS), 16)
-#agent.loadModel("models/Model-latest.weights.h5")
+agent.loadModel("models/Model-latest.weights.h5")
+# agent.epsilon = 0.75
 
 
 rew_w100, rew_w10 = deque(maxlen=100), deque(maxlen=10)
@@ -50,11 +51,11 @@ roundNum = 0
 m = reset()
 mapsize = m.getMovableCount()
 print("Map size:", mapsize)
-GOAL_REWARD      = 100
-STEP_PENALTY     = -1.0     # every time step
-NEW_CELL_REWARD  = +.05
-currGoal = .70
-goalCount = 0
+GOAL_REWARD      = 300
+STEP_PENALTY     = -0.00001     # every time step
+NEW_CELL_REWARD  = +.1
+currGoal = 1
+goalCount = deque(maxlen=20)
 while roundNum < 10000:
     roundNum += 1
     m = reset()
@@ -70,23 +71,28 @@ while roundNum < 10000:
         if roundNum % 10 == 0:
             m.displayBase()
         if afterLen >= (mapsize*currGoal):
-            goalCount += 1
-            if goalCount >= 20:
-                currGoal += .05
-                if currGoal > 1.0:
-                    currGoal = 1.0
-                goalCount = 0
+            goalCount.append(1)
+            if sum(goalCount) >= 15:
+                currGoal += .01
+                if currGoal > 1:
+                    currGoal = 1
+                    break
+                agent.epsilon = max(.2,agent.epsilon*1.2)
+                goalCount.clear()
+                agent.saveModel(currGoal)
                 print("Goal reached, making harder",currGoal)
-            print("-------------------------------------Visited all cells",currGoal)
+            print("-------------------------------------Visited all cells",currGoal, "Goal count:", sum(goalCount))
             reward = GOAL_REWARD
         elif afterLen > startLen:
-            reward = NEW_CELL_REWARD * (afterLen - startLen)
+            reward = NEW_CELL_REWARD * (afterLen - startLen) * ((afterLen/mapsize))
         else:
             reward = STEP_PENALTY
         agent.remember(m.getGrid3D(), reward, reward == GOAL_REWARD)
         allRewards += reward
         if reward == GOAL_REWARD:
             break
+    if afterLen < (mapsize*currGoal):
+        goalCount.append(0)
     print("Total rewards:", allRewards)
     if roundNum % 100 == 0:
         agent.epsilon = oldEps

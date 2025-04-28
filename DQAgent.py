@@ -9,9 +9,9 @@ for gpu in gpus:
 from tensorflow.keras.models import Sequential, Model
 from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, Input, Lambda, Add, Reshape, Concatenate, Multiply, Softmax, Layer, Activation, Subtract
 from tensorflow.keras.optimizers import Adam
-from collections import deque
 import random
 from datetime import datetime
+from PER import PrioritizedReplayBuffer
 
 
 class DQAgent:
@@ -23,7 +23,7 @@ class DQAgent:
         self.learningRate = 0.0001
         self.epsilonMin = 0.01
         self.gamma = 0.99
-        self.memory = deque(maxlen=51200)
+        self.memory = PrioritizedReplayBuffer(capacity=1_000_000, alpha=0.6)
         self.minMemorySize = 5120
         self.sampleSize = 64
         self.actionModel = self.buildModel()
@@ -36,6 +36,9 @@ class DQAgent:
         self.actionModel.load_weights(modelPath)
         self.targetModel.load_weights(modelPath)
         self.updateTargetModel()
+    
+    def saveModel(self,addon=""):
+        self.actionModel.save_weights(f"models/Model-{datetime.now().strftime('%d-%m-%Y-%H-%M')}-{addon}.weights.h5")
     
     def updateTargetModel(self):
         self.updateTime -=1
@@ -54,17 +57,17 @@ class DQAgent:
         inputs = Input(shape=self.inputShape)
 
         # shared convolution trunk
-        x = Conv2D(64, 3, activation='relu')(inputs)
-        x = Conv2D(64, 3, activation='relu')(x)
+        x = Conv2D(64, 3, activation='relu', padding="same")(inputs)
+        x = Conv2D(64, 3, activation='relu', padding="same")(x)
         x = Flatten()(x)
-        x = Dense(128, activation='relu')(x)         # (batch, 128)
+        x = Dense(256, activation='relu')(x)         # (batch, 128)
 
         # value stream
-        v = Dense(64, activation='relu')(x)
+        v = Dense(128, activation='relu')(x)
         v = Dense(1)(v)             # V(s) in fp32
 
         # advantage stream
-        a = Dense(64, activation='relu')(x)
+        a = Dense(128, activation='relu')(x)
         a = Dense(self.outputShape, activation='linear')(a)  # A(s,a)
 
         mean_a = Lambda(lambda t: tf.reduce_mean(t, axis=1, keepdims=True))(a)
@@ -91,7 +94,7 @@ class DQAgent:
     # call to remember the last action taken and the reward received
     # this is called after the action has been taken and a new state has been received
     def remember(self,state,reward,done):
-        self.memory.append((self.lastState,self.lastAction,reward,state.reshape((1, *self.inputShape)).copy(),done))
+        self.memory.add((self.lastState, self.lastAction, reward,state.reshape((1, *self.inputShape)).copy(), done))
         self.train()
     
     def train(self):
@@ -104,7 +107,7 @@ class DQAgent:
         #     self.trainTime -= 1
         #     return
         # self.trainTime = 10
-        batch = random.sample(self.memory, self.sampleSize)
+        idxs, batch, is_w = self.memory.sample(self.sampleSize)
 
         states      = np.vstack([exp[0] for exp in batch])           # shape: (batch, H, W, C)
         actions     = np.array([exp[1] for exp in batch])            # shape: (batch,)
@@ -112,15 +115,22 @@ class DQAgent:
         next_states = np.vstack([exp[3] for exp in batch])           # shape: (batch, H, W, C)
         dones       = np.array([exp[4] for exp in batch])            # shape: (batch,)
 
-        q_next_online = self.actionModel.predict(next_states,  verbose=0)  # shape: (batch, n_actions)
-        q_next_target = self.targetModel.predict(next_states,  verbose=0)  # shape: (batch, n_actions)
+        q_next_online = self.actionModel.predict(next_states, verbose=0)  # shape: (batch, n_actions)
+        q_next_target = self.targetModel.predict(next_states, verbose=0)  # shape: (batch, n_actions)
 
-        q_current = self.actionModel.predict(states, verbose=0)
+        targets = self.actionModel.predict(states, verbose=0)
+        q_current = targets.copy()
 
-        q_current[ np.arange(self.sampleSize), actions ] = (
+        targets[ np.arange(self.sampleSize), actions ] = (
             rewards + (1 - dones) * self.gamma *
             q_next_target[np.arange(self.sampleSize), q_next_online.argmax(1)]  # select via online net and evaluate via target net
         )
 
-        self.actionModel.fit(states, q_current, epochs=1, batch_size=self.sampleSize, verbose=0)
+        td_errors = targets[np.arange(self.sampleSize), actions] - \
+                    q_current[np.arange(self.sampleSize), actions]
+
+        self.actionModel.fit(states, targets,sample_weight=is_w,batch_size=self.sampleSize,verbose=0)
+
+        self.memory.update_priorities(idxs, td_errors)
+
         self.updateTargetModel()
