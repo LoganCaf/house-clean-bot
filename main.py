@@ -2,6 +2,7 @@
 # This file contains the main function that initializes the environment and the DQAgent, and runs the training loop.
 
 from map import Map
+from DataReader import svg_to_color_grid
 from DQAgent import DQAgent
 import random
 import matplotlib.pyplot as plt
@@ -20,7 +21,7 @@ def update_ma(window, running_sum, new_val, ma_store):
     return running_sum
 
 
-MAXSIZE = 100
+MAXSIZE = 300
 MAXBANDS = 3
 
 def reset():
@@ -31,6 +32,8 @@ def reset():
     m.add_wall(0, 90, 100, 100)
     m.add_agent(random.randint(20, 70), random.randint(20, 70))
     return m
+
+#static_rgb = svg_to_color_grid('train-00/0000-0003', grid_size=(MAXSIZE, MAXSIZE))    # may want to adapt this into an array of the maps eventually
 
 
 agent = DQAgent((MAXSIZE, MAXSIZE, MAXBANDS), 16)
@@ -47,6 +50,7 @@ sum_vis100 = sum_vis10 = 0.0
 MA_rew100, MA_rew10 = [], []        # what will plot
 MA_vis100, MA_vis10 = [], []
 
+
 roundNum = 0
 m = reset()
 mapsize = m.getMovableCount()
@@ -57,8 +61,9 @@ NEW_CELL_REWARD  = +.1
 currGoal = 1
 goalCount = deque(maxlen=20)
 while roundNum < 10000:
+
     roundNum += 1
-    m = reset()
+    m = reset()     # this may not be the portion to comment out but I think it will help establish the map as the training data? -Z
     allRewards = 0
     print("Round:", roundNum, "Epsilon:", agent.epsilon)
     if roundNum % 100 == 0:

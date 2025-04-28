@@ -114,6 +114,20 @@ class Map:
                 if self.grid[x,y,0] != 1:
                     count += 1
         return count
+    
+    def getCleaned(self):
+        arr = np.zeros((self.length, self.width))
+        for x in range(self.length):
+            for y in range(self.width):
+                if self.grid[x][y] == 'c':  # or however this is set to read if a spot is clean / has been visited
+                    arr[x, y] = 1.0
+        return arr
+    
+    def getAgent(self):
+        arr = np.zeros((self.length, self.width))
+        ax, ay = self.agent
+        arr[ax, ay] = 1.0
+        return arr
 
 
         
