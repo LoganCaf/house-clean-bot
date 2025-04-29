@@ -121,7 +121,7 @@ while roundNum < 10000:
         m.move_direction(agent.act(m.getGrid3D()))
         afterLen = m.grid[:,:,2].sum()
 
-        if roundNum % 1 == 0:
+        if roundNum % 10 == 0:
             m.displayBase()
         if afterLen >= (mapsize*currGoal):
             goalCount.append(1)

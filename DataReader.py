@@ -116,7 +116,6 @@ def svg_to_binary_grid(svg_file, grid_size=(300,300)):
 def colorGridTo3dGrid(color_grid):
     # Convert the color grid to a 3D grid
     uniqueColors = np.unique(color_grid.reshape(-1, color_grid.shape[2]), axis=0)
-    print(uniqueColors)
     color_to_index = {tuple(color): idx for idx, color in enumerate(uniqueColors)}
     grid = np.zeros((color_grid.shape[0], color_grid.shape[1], len(uniqueColors)), dtype=np.uint8)
     for i in range(color_grid.shape[0]):
