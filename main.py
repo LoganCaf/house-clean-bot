@@ -61,8 +61,8 @@ NEW_CELL_REWARD  = +.1
 currGoal = 1
 goalCount = deque(maxlen=20)
 while roundNum < 10000:
-
     roundNum += 1
+    m.close()
     m = reset()     # this may not be the portion to comment out but I think it will help establish the map as the training data? -Z
     allRewards = 0
     print("Round:", roundNum, "Epsilon:", agent.epsilon)

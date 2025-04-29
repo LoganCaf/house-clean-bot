@@ -34,14 +34,17 @@ class DQAgent:
         self.trainTime = 0
         self.updateTargetModel()
     
+    ## load the model from a file
     def loadModel(self,modelPath):
         self.actionModel.load_weights(modelPath)
         self.targetModel.load_weights(modelPath)
         self.updateTargetModel()
     
+    ## save the model to a file
     def saveModel(self,addon=""):
         self.actionModel.save_weights(f"models/Model-{datetime.now().strftime('%d-%m-%Y-%H-%M')}-{addon}.weights.h5")
     
+    ## update target model from action model
     def updateTargetModel(self):
         self.updateTime -=1
         if self.updateTime > 0:
@@ -52,9 +55,7 @@ class DQAgent:
             self.targetModel.save_weights(f"models/Model-{datetime.now().strftime('%d-%m-%Y-%H-%M')}.weights.h5")
             self.actionModel.save_weights(f"models/Model-latest.weights.h5")
 
-    def reset(self):
-        pass
-
+    ## build the model
     def buildModel(self):
         inputs = Input(shape=self.inputShape,dtype=tf.float16)
 
@@ -101,6 +102,7 @@ class DQAgent:
         self.memory.add((self.lastState, self.lastAction, reward,state.reshape((1, *self.inputShape)).copy(), done))
         self.train()
     
+    # trains the action model using the experience replay buffer
     def train(self):
         if len(self.memory) < self.minMemorySize:
             return
