@@ -33,8 +33,21 @@ def reset():
     m.add_agent(random.randint(20, 70), random.randint(20, 70))
     return m
 
-#static_rgb = svg_to_color_grid('train-00/0000-0003', grid_size=(MAXSIZE, MAXSIZE))    # may want to adapt this into an array of the maps eventually
+static_rgb = svg_to_color_grid('train-00/0000-0003.svg', grid_size=(MAXSIZE, MAXSIZE))    # may want to adapt this into an array of the maps eventually
+map_files = [
+    'train-00/0000-0002.svg',
+    'train-00/0000-0003.svg',
+    'train-00/0000-0005.svg'
+]
+static_maps = [
+    svg_to_color_grid(path, grid_size=(MAXSIZE, MAXSIZE))
+    for path in map_files
+]
 
+def reset_svg():
+    m = Map(100, 100, 11, MAXSIZE, MAXBANDS)
+    # add walls based on parsing?
+    return m
 
 agent = DQAgent((MAXSIZE, MAXSIZE, MAXBANDS), 16)
 #agent.loadModel("models/Model-latest.weights.h5")
