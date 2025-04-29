@@ -63,14 +63,14 @@ def reset_svg():
 static_binary = svg_to_binary_grid('train-00/0000-0003.svg', grid_size=(MAXSIZE, MAXSIZE))
 def reset_svg_binary():
     mask = static_binary
-    m = Map(GRID_SIZE[0], GRID_SIZE[1], 11, MAXSIZE, MAXBANDS)
+    m = Map(mask.shape[0], mask.shape[1], 11, MAXSIZE, MAXBANDS)
     print(m.grid.shape, mask.shape)
     m.grid[:,:,0] = mask.copy() # sets walls
     
     # Start agent on a free cell
     while True:
-        startx = random.randint(0, GRID_SIZE[0]-1)
-        starty = random.randint(0, GRID_SIZE[0]-1)
+        startx = random.randint(0, mask.shape[0]-1)
+        starty = random.randint(0, mask.shape[1]-1)
         if not m.checkCollision(startx, starty):
             m.add_agent(startx, starty)
             break
@@ -102,7 +102,6 @@ currGoal = 1
 goalCount = deque(maxlen=20)
 while roundNum < 10000:
     roundNum += 1
-    m.close()
     m = reset_svg_binary()     # this may not be the portion to comment out but I think it will help establish the map as the training data? -Z
     allRewards = 0
     print("Round:", roundNum, "Epsilon:", agent.epsilon)

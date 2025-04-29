@@ -51,7 +51,7 @@ class Map:
             cv.imshow("Environment", img)
     
     def displayBase(self,show=True):
-        cell_size = 5
+        cell_size = 1000//max(self.length, self.width)
         img = np.zeros((self.length * cell_size, self.width * cell_size, 3), np.uint8)
         for x in range(self.length):
             for y in range(self.width):
