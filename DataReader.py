@@ -108,7 +108,11 @@ def svg_to_color_grid(svg_file, grid_size=(300,300)):
 
     return color_grid
 
-
+def svg_to_binary_grid(svg_file, grid_size=(300,300)):
+    rgb = svg_to_color_grid(svg_file, grid_size=grid_size)  # (H,W,3)
+    # anything not pure white background → wall
+    binary = (rgb.min(axis=2) < 0.99).astype(np.uint8)
+    return binary
 
 
 
