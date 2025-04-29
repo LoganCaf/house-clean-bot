@@ -119,7 +119,7 @@ class Map:
         arr = np.zeros((self.length, self.width))
         for x in range(self.length):
             for y in range(self.width):
-                if self.grid[x][y] == 'c':  # or however this is set to read if a spot is clean / has been visited
+                if self.grid[x,y] == 'c':  # or however this is set to read if a spot is clean / has been visited
                     arr[x, y] = 1.0
         return arr
     
