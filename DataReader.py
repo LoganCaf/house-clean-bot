@@ -105,7 +105,6 @@ def svg_to_color_grid(svg_file, grid_size=(300,300)):
                 i, j = to_grid(seg.point(t))
                 if 0 <= i < rows and 0 <= j < cols:
                     color_grid[i,j,:] = rgb
-
     return color_grid
 
 def svg_to_binary_grid(svg_file, grid_size=(300,300)):
@@ -113,6 +112,17 @@ def svg_to_binary_grid(svg_file, grid_size=(300,300)):
     # anything not pure white background → wall
     binary = (rgb.min(axis=2) < 0.99).astype(np.uint8)
     return binary
+
+def colorGridTo3dGrid(color_grid):
+    # Convert the color grid to a 3D grid
+    uniqueColors = np.unique(color_grid.reshape(-1, color_grid.shape[2]), axis=0)
+    print(uniqueColors)
+    color_to_index = {tuple(color): idx for idx, color in enumerate(uniqueColors)}
+    grid = np.zeros((color_grid.shape[0], color_grid.shape[1], len(uniqueColors)), dtype=np.uint8)
+    for i in range(color_grid.shape[0]):
+        for j in range(color_grid.shape[1]):
+            grid[i, j, color_to_index[tuple(color_grid[i, j])]] = 1
+    return grid
 
 
 

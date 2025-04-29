@@ -2,12 +2,13 @@
 # This file contains the main function that initializes the environment and the DQAgent, and runs the training loop.
 
 from map import Map
-from DataReader import svg_to_color_grid, svg_to_binary_grid
+from DataReader import svg_to_color_grid, svg_to_binary_grid, colorGridTo3dGrid
 from DQAgent import DQAgent
 import random
 import matplotlib.pyplot as plt
 import numpy as np
 from collections import deque
+import os
 
 # helper Incrementally update a moving-average list
 def update_ma(window, running_sum, new_val, ma_store):
@@ -36,6 +37,7 @@ def reset():
     return m
 
 static_rgb = svg_to_color_grid('train-00/0000-0003.svg', grid_size=(MAXSIZE, MAXSIZE))    # may want to adapt this into an array of the maps eventually
+
 map_files = [
     'train-00/0000-0002.svg',
     'train-00/0000-0003.svg',
@@ -50,11 +52,18 @@ static_maps = [
 # This function may require more implementation to incorporate color
 def reset_svg():
     mask = static_rgb   # change this to the function calling a random map once it works
-    m = Map(GRID_SIZE[0], GRID_SIZE[1], 11, MAXSIZE, MAXBANDS)
-    for i in range(GRID_SIZE[0]):
-        for j in range(GRID_SIZE[1]):
-            if mask[i, j]:
-                m.grid[i,j,0] = 1
+    m = Map(mask.shape[0], mask.shape[1], 11, MAXSIZE, MAXBANDS)
+    print(m.grid.shape, mask.shape)
+    m.grid[:,:,0] = colorGridTo3dGrid(mask).copy()[:,:,[0,1,4,5,6]].sum(axis=2) # sets walls
+    
+    # Start agent on a free cell
+    while True:
+        startx = random.randint(0, mask.shape[0]-1)
+        starty = random.randint(0, mask.shape[1]-1)
+        if not m.checkCollision(startx, starty):
+            m.add_agent(startx, starty)
+            break
+    return m
     
     # Start agent on a free cell ? (not a wall)
 
@@ -102,12 +111,12 @@ currGoal = 1
 goalCount = deque(maxlen=20)
 while roundNum < 10000:
     roundNum += 1
-    m = reset_svg_binary()     # this may not be the portion to comment out but I think it will help establish the map as the training data? -Z
+    m = reset_svg()     # this may not be the portion to comment out but I think it will help establish the map as the training data? -Z
     allRewards = 0
     print("Round:", roundNum, "Epsilon:", agent.epsilon)
     if roundNum % 100 == 0:
         oldEps = agent.epsilon
-    for i in range(300):
+    for i in range(1000):
         startLen = m.grid[:,:,2].sum()
         m.move_direction(agent.act(m.getGrid3D()))
         afterLen = m.grid[:,:,2].sum()
