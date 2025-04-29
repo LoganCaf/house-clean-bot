@@ -2,10 +2,11 @@
 # This file contains the main function that initializes the environment and the DQAgent, and runs the training loop.
 
 from map import Map
-from DataReader import svg_to_color_grid
+from DataReader import svg_to_color_grid, svg_to_binary_grid
 from DQAgent import DQAgent
 import random
 import matplotlib.pyplot as plt
+import numpy as np
 from collections import deque
 
 # helper Incrementally update a moving-average list
@@ -23,6 +24,7 @@ def update_ma(window, running_sum, new_val, ma_store):
 
 MAXSIZE = 300
 MAXBANDS = 3
+GRID_SIZE = [100, 100]
 
 def reset():
     m = Map(100, 100, 11, MAXSIZE, MAXBANDS)
@@ -44,9 +46,35 @@ static_maps = [
     for path in map_files
 ]
 
+
+# This function may require more implementation to incorporate color
 def reset_svg():
-    m = Map(100, 100, 11, MAXSIZE, MAXBANDS)
-    # add walls based on parsing?
+    mask = static_rgb   # change this to the function calling a random map once it works
+    m = Map(GRID_SIZE[0], GRID_SIZE[1])
+    for i in range(GRID_SIZE[0]):
+        for j in range(GRID_SIZE[1]):
+            if mask[i, j]:
+                m.grid[i][j] = '0'
+    
+    # Start agent on a free cell
+    free_cells = list(zip(*np.where(mask == 0)))
+    start = random.choice(free_cells)
+    m.add_agent(*start)
+
+
+# Starting with binary maps
+def reset_svg_binary():
+    mask = svg_to_binary_grid(static_rgb)
+    m = Map(GRID_SIZE[0], GRID_SIZE[1])
+    for i in range(GRID_SIZE[0]):
+        for j in range(GRID_SIZE[1]):
+            if mask[i, j]:
+                m.grid[i][j] = '0'      # check this value...
+    
+    # Start agent on a free cell
+    free_cells = list(zip(*np.where(mask == 0)))
+    start = random.choice(free_cells)
+    m.add_agent(*start)
     return m
 
 agent = DQAgent((MAXSIZE, MAXSIZE, MAXBANDS), 16)
