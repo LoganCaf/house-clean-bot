@@ -1,4 +1,5 @@
-### main.py
+## main.py
+## Author: Logan Caffey
 # This file contains the main function that initializes the environment and the DQAgent, and runs the training loop.
 
 from map import Map
@@ -36,52 +37,18 @@ def reset():
     m.add_agent(random.randint(20, 70), random.randint(20, 70))
     return m
 
-static_rgb = svg_to_color_grid('train-00/0000-0003.svg', grid_size=(MAXSIZE, MAXSIZE))    # may want to adapt this into an array of the maps eventually
-
-map_files = [
-    'train-00/0000-0002.svg',
-    'train-00/0000-0003.svg',
-    'train-00/0000-0005.svg'
-]
-static_maps = [
-    svg_to_color_grid(path, grid_size=(MAXSIZE, MAXSIZE))
-    for path in map_files
-]
+static_rgb = svg_to_color_grid('train-00/0000-0003.svg', grid_size=(MAXSIZE, MAXSIZE))
 
 
-# This function may require more implementation to incorporate color
+
 def reset_svg():
-    mask = static_rgb   # change this to the function calling a random map once it works
+    mask = static_rgb
     m = Map(mask.shape[0], mask.shape[1], 11, MAXSIZE, MAXBANDS)
     m.grid[:,:,0] = (colorGridTo3dGrid(mask).copy()[:,:,[0,4,5,6]].sum(axis=2)>0) # sets walls
     
-    # Start agent on a free cell
-    while True:
-        startx = random.randint(0, mask.shape[0]-1)
-        starty = random.randint(0, mask.shape[1]-1)
-        if not m.checkCollision(startx, starty):
-            m.add_agent(startx, starty)
-            break
+    m.add_agent(50, 200)
     return m
-    
-    # Start agent on a free cell ? (not a wall)
 
-
-# Starting with binary maps
-static_binary = svg_to_binary_grid('train-00/0000-0003.svg', grid_size=(MAXSIZE, MAXSIZE))
-def reset_svg_binary():
-    mask = static_binary
-    m = Map(mask.shape[0], mask.shape[1], 11, MAXSIZE, MAXBANDS)
-    m.grid[:,:,0] = mask.copy() # sets walls
-    
-    # Start agent on a free cell
-    while True:
-        startx = random.randint(0, mask.shape[0]-1)
-        starty = random.randint(0, mask.shape[1]-1)
-        if not m.checkCollision(startx, starty):
-            m.add_agent(startx, starty)
-            break
-    return m
 
 agent = DQAgent((MAXSIZE, MAXSIZE, MAXBANDS), 16)
 #agent.loadModel("models/Model-latest.weights.h5")
@@ -98,6 +65,7 @@ MA_rew100, MA_rew10 = [], []        # what will plot
 MA_vis100, MA_vis10 = [], []
 
 
+# game log setup
 roundNum = 0
 GOAL_REWARD      = 300
 STEP_PENALTY     = -0.00001     # every time step
@@ -105,33 +73,31 @@ NEW_CELL_REWARD  = +.1
 currGoal = 1
 goalCount = deque(maxlen=20)
 while roundNum < 10000:
+    # round setup
     roundNum += 1
-    m = reset()     # this may not be the portion to comment out but I think it will help establish the map as the training data? -Z
+    m = reset_svg()
     mapsize = m.getMovableCount()
     allRewards = 0
     print("Round:", roundNum, "Epsilon:", agent.epsilon)
     if roundNum % 100 == 0:
         oldEps = agent.epsilon
     for i in range(1000):
+        # agent action
         startLen = m.grid[:,:,2].sum()
+        startPos = m.agent
         m.move_direction(agent.act(m.getGrid3D()))
         afterLen = m.grid[:,:,2].sum()
 
-        if roundNum % 100 == 0:
+        if roundNum % 10 == 0: # show every 10 rounds
             m.displayBase()
+        
+        # rewards
         if afterLen >= (mapsize*currGoal):
             goalCount.append(1)
-            if sum(goalCount) >= 15:
-                currGoal += .01
-                if currGoal > 1:
-                    currGoal = 1
-                    break
-                agent.epsilon = max(.2,agent.epsilon*1.2)
-                goalCount.clear()
-                agent.saveModel(currGoal)
-                print("Goal reached, making harder",currGoal)
             print("-------------------------------------Visited all cells",currGoal, "Goal count:", sum(goalCount))
             reward = GOAL_REWARD
+        if m.agent == startPos:
+            reward = STEP_PENALTY*10
         elif afterLen > startLen:
             reward = NEW_CELL_REWARD * (afterLen - startLen) * ((afterLen/mapsize))
         else:
@@ -146,7 +112,7 @@ while roundNum < 10000:
     if roundNum % 100 == 0:
         agent.epsilon = oldEps
     
-
+    # update logs and graphs
     visited_pct = (m.grid[:, :, 2].sum() / mapsize) * 100.0   # % of cells cleaned this episode
 
     # update running moving averages
@@ -156,18 +122,18 @@ while roundNum < 10000:
     sum_vis100 = update_ma(vis_w100, sum_vis100, visited_pct, MA_vis100)
     sum_vis10  = update_ma(vis_w10 , sum_vis10 , visited_pct, MA_vis10)
 
-    # --- plotting ---
+    # plots
     plt.clf()
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(6, 8), sharex=True)
 
-    # rewards (existing plot)
+    # rewards plots
     ax1.plot(MA_rew100, label="100-pt MA")
     ax1.plot(MA_rew10 , label="10-pt MA")
     ax1.set_ylabel("Total reward")
     ax1.legend()
     ax1.grid(True, linestyle=":")
 
-    # NEW: % of spaces visited
+    # % of spaces visited
     ax2.plot(MA_vis100, label="% visited (100-pt MA)")
     ax2.plot(MA_vis10 , label="% visited (10-pt MA)")
     ax2.set_ylabel("Visited %")

@@ -1,4 +1,5 @@
 ## DQAgent.py
+## Author: Logan Caffey
 # This file contains the DQAgent class, which implements a Deep Q-Learning agent using TensorFlow and Keras.
 
 import os
@@ -8,8 +9,8 @@ import tensorflow as tf
 gpus = tf.config.list_physical_devices('GPU')
 for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
-from tensorflow.keras.models import Sequential, Model
-from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, Input, Lambda, Add, Reshape, Concatenate, Multiply, Softmax, Layer, Activation, Subtract, MaxPooling2D
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense, Flatten, Conv2D, Input, Lambda, MaxPooling2D
 from tensorflow.keras.optimizers import Adam
 import random
 from datetime import datetime
@@ -47,17 +48,17 @@ class DQAgent:
     ## update target model from action model
     def updateTargetModel(self):
         self.updateTime -=1
-        if self.updateTime > 0:
+        if self.updateTime > 0: # only update after timer
             return
         self.targetModel.set_weights(self.actionModel.get_weights())
         self.updateTime = 1000
-        if self.epsilon < .9:
+        if self.epsilon < .9: # only save trained for a bit
             self.targetModel.save_weights(f"models/Model-{datetime.now().strftime('%d-%m-%Y-%H-%M')}.weights.h5")
             self.actionModel.save_weights(f"models/Model-latest.weights.h5")
 
     ## build the model
     def buildModel(self):
-        inputs = Input(shape=self.inputShape,dtype=tf.float16)
+        inputs = Input(shape=self.inputShape,dtype=tf.float32)
 
         # shared convolution trunk
         x = Conv2D(64, 3, activation='relu', padding="same")(inputs)
@@ -65,15 +66,15 @@ class DQAgent:
         x = Conv2D(32, 3, activation='relu', padding="same")(x)
         x = MaxPooling2D(pool_size=(3, 3))(x)
         x = Flatten()(x)
-        x = Dense(256, activation='relu')(x)         # (batch, 128)
+        x = Dense(256, activation='relu')(x)
 
         # value stream
         v = Dense(128, activation='relu')(x)
-        v = Dense(1)(v)             # V(s) in fp32
+        v = Dense(1)(v)
 
         # advantage stream
         a = Dense(128, activation='relu')(x)
-        a = Dense(self.outputShape, activation='linear')(a)  # A(s,a)
+        a = Dense(self.outputShape, activation='linear')(a)
 
         mean_a = Lambda(lambda t: tf.reduce_mean(t, axis=1, keepdims=True))(a)
         q_values = tf.keras.layers.add([v, Lambda(lambda t: t[0] - t[1])([a, mean_a])])
@@ -82,7 +83,7 @@ class DQAgent:
         model = Model(inputs, q_values, name="Dueling_DQN")
         model.compile(
             optimizer=Adam(self.learningRate),
-            loss=tf.keras.losses.Huber(delta=1.0)           # robust for RL targets
+            loss=tf.keras.losses.Huber(delta=1.0)
         )
         return model
 
@@ -99,6 +100,8 @@ class DQAgent:
     # call to remember the last action taken and the reward received
     # this is called after the action has been taken and a new state has been received
     def remember(self,state,reward,done):
+        if self.learningRate == 0:
+            return
         self.memory.add((self.lastState, self.lastAction, reward,state.reshape((1, *self.inputShape)).copy(), done))
         self.train()
     
@@ -109,34 +112,55 @@ class DQAgent:
         self.epsilon *= self.epsilonDecay
         if self.epsilon < self.epsilonMin:
             self.epsilon = self.epsilonMin
-        # if self.trainTime > 0:
-        #     self.trainTime -= 1
-        #     return
-        # self.trainTime = 10
         idxs, batch, is_w = self.memory.sample(self.sampleSize)
 
-        states      = np.vstack([exp[0] for exp in batch])           # shape: (batch, H, W, C)
-        actions     = np.array([exp[1] for exp in batch])            # shape: (batch,)
-        rewards     = np.array([exp[2] for exp in batch])            # shape: (batch,)
-        next_states = np.vstack([exp[3] for exp in batch])           # shape: (batch, H, W, C)
-        dones       = np.array([exp[4] for exp in batch])            # shape: (batch,)
+        states      = np.vstack([exp[0] for exp in batch])
+        actions     = np.array([exp[1] for exp in batch], dtype=np.int32)
+        rewards     = np.array([exp[2] for exp in batch], dtype=np.float32)
+        next_states = np.vstack([exp[3] for exp in batch])
+        dones       = np.array([exp[4] for exp in batch], dtype=np.float32)
 
-        q_next_online = self.actionModel.predict(next_states, verbose=0)  # shape: (batch, n_actions)
-        q_next_target = self.targetModel.predict(next_states, verbose=0)  # shape: (batch, n_actions)
+        # Convert to tensors
+        states = tf.convert_to_tensor(states, dtype=tf.float32)
+        next_states = tf.convert_to_tensor(next_states, dtype=tf.float32)
+        rewards = tf.convert_to_tensor(rewards, dtype=tf.float32)
+        dones = tf.convert_to_tensor(dones, dtype=tf.float32)
+        actions = tf.convert_to_tensor(actions, dtype=tf.int32)
+        is_w = tf.convert_to_tensor(is_w, dtype=tf.float32)
 
-        targets = self.actionModel.predict(states, verbose=0)
-        q_current = targets.copy()
+        # Calculate Target Q-values
+        # Double DQN: Use action_model to select best next action, target_model to evaluate it
+        q_next_online_actions = tf.argmax(self.actionModel(next_states), axis=1, output_type=tf.int32) # Get best actions from online model
+        q_next_target_values = self.targetModel(next_states) # Get all Q-values from target model
 
-        targets[ np.arange(self.sampleSize), actions ] = (
-            rewards + (1 - dones) * self.gamma *
-            q_next_target[np.arange(self.sampleSize), q_next_online.argmax(1)]  # select via online net and evaluate via target net
-        )
+        # Select the Q-value from target network corresponding to the action selected by the online network
+        action_indices = tf.stack([tf.range(self.sampleSize, dtype=tf.int32), q_next_online_actions], axis=1)
+        q_next_selected = tf.gather_nd(q_next_target_values, action_indices)
 
-        td_errors = targets[np.arange(self.sampleSize), actions] - \
-                    q_current[np.arange(self.sampleSize), actions]
+        # Calculate target: R + gamma * Q_target(s', argmax_a Q_online(s', a)) * (1 - done)
+        target_q_values = rewards + (1.0 - dones) * self.gamma * q_next_selected
 
-        self.actionModel.fit(states, targets,sample_weight=is_w,batch_size=self.sampleSize,verbose=0)
+        # Calculate Loss and Update Action Model
+        with tf.GradientTape() as tape:
+            # Get Q-values for the *actual actions taken* in the sampled states
+            q_current_online_values = self.actionModel(states)
+            action_indices_current = tf.stack([tf.range(self.sampleSize, dtype=tf.int32), actions], axis=1)
+            q_current_selected = tf.gather_nd(q_current_online_values, action_indices_current)
 
-        self.memory.update_priorities(idxs, td_errors)
+            # Calculate TD Error for PER update
+            td_errors = target_q_values - q_current_selected
+
+            # Calculate Huber loss, weighted by importance sampling weights
+            loss = self.actionModel.loss(target_q_values, q_current_selected)
+            weighted_loss = tf.reduce_mean(loss * is_w)
+
+        # Compute gradients and apply updates
+        gradients = tape.gradient(weighted_loss, self.actionModel.trainable_variables)
+        self.actionModel.optimizer.apply_gradients(zip(gradients, self.actionModel.trainable_variables))
+
+        # Update PER priorities
+        self.memory.update_priorities(idxs, tf.abs(td_errors).numpy())
+
+        self.updateTargetModel()
 
         self.updateTargetModel()

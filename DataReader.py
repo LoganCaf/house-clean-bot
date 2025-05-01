@@ -1,39 +1,6 @@
-# Various ways just to visualize the image
-
-
-# from svglib.svglib import svg2rlg
-# def is_svg_by_svglib(filepath):
-#     try:
-#         drawing = svg2rlg(filepath)
-#         return True
-#     except Exception:
-#         return False
-    
-
-# from IPython.display import SVG, display
-
-# svg_data = 'train-00/0000-0003.svg'
-# display(SVG(svg_data))
-
-
-# import sys
-# from PyQt5 import QtSvg
-# from PyQt5.QtWidgets import QApplication
-# from PyQt5.QtSvg import QSvgWidget
-
-# app = QApplication(sys.argv)
-# svg_widget = QtSvg.QSvgWidget('train-00/0000-0003.svg')
-# svg_widget.show()
-# sys.exit(app.exec_())
-
-
-
-
-
-
-
-
-# Using svgpathtools to parse the image
+## DataReader.py
+## Author: Zach Flagg, Logan Caffey
+# This file contains functions to read and process SVG files, converting them into a grid format suitable for the Map class.
 
 from svgpathtools import svg2paths2
 import numpy as np
@@ -113,8 +80,8 @@ def svg_to_binary_grid(svg_file, grid_size=(300,300)):
     binary = (rgb.min(axis=2) < 0.99).astype(np.uint8)
     return binary
 
+# Convert the color grid to a 3D 1 hot grid
 def colorGridTo3dGrid(color_grid):
-    # Convert the color grid to a 3D grid
     uniqueColors = np.unique(color_grid.reshape(-1, color_grid.shape[2]), axis=0)
     color_to_index = {tuple(color): idx for idx, color in enumerate(uniqueColors)}
     grid = np.zeros((color_grid.shape[0], color_grid.shape[1], len(uniqueColors)), dtype=np.uint8)
@@ -122,25 +89,3 @@ def colorGridTo3dGrid(color_grid):
         for j in range(color_grid.shape[1]):
             grid[i, j, color_to_index[tuple(color_grid[i, j])]] = 1
     return grid
-
-
-
-
-
-
-####### Visualize the data
-
-import matplotlib.pyplot as plt
-
-# grid, ... =
-# color_grid = svg_to_color_grid('train-00/0000-0003.svg')
-#grid = binary_dilation(grid, iterations=1).astype(np.uint8)
-# binary_grid = svg_to_binary_grid('train-00/0000-0003.svg')
-
-
-# plt.figure(figsize=(6,6))
-# plt.imshow(binary_grid, interpolation='nearest')     # change to 'nearest' for blockier image but more precise, bilinear for smoother
-# plt.axis('off')
-# plt.title("Parsed Grid")
-# plt.show()
-

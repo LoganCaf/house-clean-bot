@@ -1,9 +1,9 @@
-### File: map.py
+## File: map.py
+## Author: Logan Caffey
 # This file contains the Map class, which represents a grid-based environment for an agent to navigate.
 
 import cv2 as cv
 import numpy as np
-from PIL import Image
 
 class Map:
     def __init__(self, length, width,agentSize,MAXSIZE,MAXBANDS):
@@ -34,6 +34,7 @@ class Map:
     def checkCollision(self, x, y):
         return x-(self.agentSize//2) < 0 or x+(self.agentSize//2) >= self.length or y-(self.agentSize//2) < 0 or y+(self.agentSize//2) >= self.width or self.grid[x-(self.agentSize//2):x+(self.agentSize//2)+1,y-(self.agentSize//2):y+(self.agentSize//2)+1,0].sum() != 0
 
+    # displays map and allows the user to move the agent
     def displayMove(self):
         while True:
             img = self.displayBase(False)
@@ -50,19 +51,33 @@ class Map:
                 break
             cv.imshow("Environment", img)
     
-    def displayBase(self,show=True):
-        cell_size = 1000//max(self.length, self.width)
-        img = np.zeros((self.length * cell_size, self.width * cell_size, 3), np.uint8)
-        for x in range(self.length):
-            for y in range(self.width):
-                color = [0, 0, 0]
-                if self.grid[x,y,0] == 1:
-                    color = [255, 255, 255]
-                elif self.grid[x,y,1] == 1:
-                    color = [0, 255, 0]
-                elif self.grid[x,y,2] == 1:
-                    color = [50, 50, 50]
-                img[x * cell_size:(x + 1) * cell_size, y * cell_size:(y + 1) * cell_size] = color
+    # displays the map
+    def displayBase(self, show=True):
+        cell_size = max(1, 1000 // max(self.length, self.width, 1)) # Avoid division by zero
+        img_height = self.length * cell_size
+        img_width = self.width * cell_size
+        img = np.zeros((img_height, img_width, 3), np.uint8) # Base black
+
+        # Walls (white)
+        wall_coords = np.argwhere(self.grid[:, :, 0] == 1)
+        for x, y in wall_coords:
+            cv.rectangle(img, (y * cell_size, x * cell_size),
+                        ((y + 1) * cell_size -1 , (x + 1) * cell_size - 1),
+                        (255, 255, 255), -1) # Use OpenCV drawing
+
+        # Cleaned (gray)
+        cleaned_coords = np.argwhere(self.grid[:, :, 2] == 1)
+        for x, y in cleaned_coords:
+            cv.rectangle(img, (y * cell_size, x * cell_size),
+                        ((y + 1) * cell_size-1, (x + 1) * cell_size-1),
+                        (50, 50, 50), -1)
+
+        # Agent (green)
+        agent_coords = np.argwhere(self.grid[:, :, 1] == 1)
+        for x, y in agent_coords:
+            cv.rectangle(img, (y * cell_size, x * cell_size),
+                        ((y + 1) * cell_size-1, (x + 1) * cell_size-1),
+                        (0, 255, 0), -1)
 
         if show:
             cv.imshow("Environment", img)
@@ -72,6 +87,7 @@ class Map:
     def close(self):
         cv.destroyAllWindows()
 
+    # moves the agen to a position if there is no collision
     def move_agent(self, x, y):
         if self.checkCollision(x, y):
             return False
@@ -80,7 +96,7 @@ class Map:
             self.add_agent(x, y)
             return True
 
-    
+    # movces the agent in a direction at a given speed
     def move_direction(self, direction):
         mult = (((direction // 4)+1)*self.agentSize)//4 # movement speed
         direction = direction%4 #movement direction
@@ -103,37 +119,11 @@ class Map:
             mult -= 1
                 
     
-
+    # returns the grid
     def getGrid3D(self):
         return self.grid
 
+    # returns the count of non wall spaces
     def getMovableCount(self):
         return self.length * self.width - self.grid[:,:,0].sum()
-    
-    # def getCleaned(self):
-    #     arr = np.zeros((self.length, self.width))
-    #     for x in range(self.length):
-    #         for y in range(self.width):
-    #             if self.grid[x,y,2] == 'c':  # or however this is set to read if a spot is clean / has been visited
-    #                 arr[x, y] = 1.0
-    #     return arr
-    
-    # def getAgent(self):
-    #     arr = np.zeros((self.length, self.width))
-    #     ax, ay = self.agent
-    #     arr[ax, ay] = 1.0
-    #     return arr
-
-
-        
-
-if __name__ == "__main__":
-    m = Map(10, 10)
-    m.add_wall(0, 0, 10, 1)
-    m.add_wall(0, 0, 1, 10)
-    m.add_wall(9, 0, 10, 10)
-    m.add_wall(0, 9, 10, 10)
-    m.add_agent(5, 5)
-    m.displayMove()
-    m.close()
 
