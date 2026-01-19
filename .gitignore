@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Training artifacts / large files (keep out of git; use releases/LFS if needed)
+models/
+train-*/
+*.h5
+*.pt
+*.ckpt
+
+# Local outputs
+*.log
+
