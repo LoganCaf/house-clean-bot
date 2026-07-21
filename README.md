@@ -1,29 +1,36 @@
 # HouseCleanBot
 
-Deep Q-learning agent that learns to clean a grid-based “house” environment.
+Deep Q-learning agent that learns a coverage policy for a grid-based house environment. The project combines a custom environment, a convolutional Q-network, prioritized experience replay, training/evaluation loops, and a GPU-ready Docker environment.
 
-## What’s Here
+## Results
 
-- Custom environment (`map.py`)
-- DQN agent + prioritized experience replay (`DQAgent.py`, `PER.py`)
-- Training entrypoint (`main.py`) and inference demo (`run.py`)
-- Dockerfile for reproducible runs
+The training output tracks total reward and the percentage of reachable cells visited using short- and long-window moving averages.
 
-## Run
+![Training reward and coverage](rewards.png)
 
-Local:
+A recorded inference run is available in [`demo.mp4`](demo.mp4).
 
-- Install deps: `pip install -r requirements.txt`
-- Train: `python3 main.py`
-- Run a trained agent: `python3 run.py`
+## Project Structure
 
-Docker:
+- `map.py`: grid environment, movement, obstacles, and coverage state.
+- `DQAgent.py`: convolutional DQN, target network, exploration, and model persistence.
+- `PER.py`: prioritized replay buffer.
+- `main.py`: training loop and evaluation plots.
+- `run.py`: inference loop for a saved model.
+- `Dockerfile`: NVIDIA TensorFlow environment for reproducible GPU execution.
 
-- Build: `docker build -t housecleanbot:latest .`
-- Train: `docker run --rm -it housecleanbot:latest python3 main.py`
-- Demo: `docker run --rm -it housecleanbot:latest python3 run.py`
+## Environment
 
-## Notes for Publishing
+The project was trained with floor-plan SVG inputs and model checkpoints that are not stored in this repository. The implementation, Docker environment, recorded demo, and training plots are included for review.
 
-Large artifacts (weights, training frames) are intentionally gitignored. If you want to share a trained model, attach it as a GitHub Release asset or use Git LFS.
+Build the container:
 
+```bash
+docker build -t housecleanbot:latest .
+```
+
+To rerun training or inference, provide a compatible SVG layout under `train-00/` and update the layout path in `main.py` or `run.py`. Inference also requires a compatible saved checkpoint under `models/`.
+
+## Collaboration
+
+Developed with Zach Flagg as a Colorado School of Mines machine-learning course project.
